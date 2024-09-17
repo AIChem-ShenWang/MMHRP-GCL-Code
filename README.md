@@ -10,9 +10,9 @@ The project consists of 4 folders: data, exp, models, utils. Each of which is de
 
   * Suzuki_HTE: Suzuki-Miyaura reaction high-throughput dataset
 
-  * AT: asymmetric thiol addition reaction high-throughput dataset
+  * AT: Asymmetric thiol addition reaction high-throughput dataset
 
-  * SNAr: nucleophilic aromatic substitution reactio literature-based dataset
+  * SNAr: Nucleophilic aromatic substitution reactio literature-based dataset
 
 * exp folder:
 
