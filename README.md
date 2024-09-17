@@ -1,6 +1,6 @@
 This project is the code for the paper "Multi-modal homogeneous chemical reaction performance prediction with graph and chemical language information", including the dataset used and the code for model training, testing, and interpretive result generation.
 
-The project uses Python in combination with the gpu provided by the Colab(https://colab.research.google.com/) to build and train the model.The required python version and python libraries are listed in pkgs.txt.
+The project uses Python in combination with the gpu provided by the Colab (https://colab.research.google.com/) to build and train the model.The required python version and python libraries are listed in pkgs.txt.
 
 The project consists of 4 folders: data, exp, models, utils. Each of which is described below.
 
