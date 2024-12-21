@@ -8,7 +8,7 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-mission_list = ["BH", "Suzuki", "AT", "SNAR"]
+mission_list = ["BH", "Suzuki", "AT", "SNAR", "ELN"]
 
 # size of word vector
 size = 128
@@ -23,7 +23,7 @@ if "BH" in mission_list:
         text = get_Buchwald_RxnSmi(BH_HTE_df.iloc[i, :])
         train_set.append(smi_tokenizer(text))
         seq_len.append(len(smi_tokenizer(text)))
-    print("Maximum sequence length is:" % max(np.array(seq_len)))
+    print("Maximum sequence length is:%d" % max(np.array(seq_len)))
 
     # sequence length distribution
     plt.figure(dpi=500)
@@ -72,7 +72,7 @@ if "Suzuki" in mission_list:
         text = get_Suzuki_RxnSmi(Suzuki_HTE_df.iloc[i, :])
         train_set.append(smi_tokenizer(text))
         seq_len.append(len(smi_tokenizer(text)))
-    print("Maximum sequence length is:" % max(np.array(seq_len)))
+    print("Maximum sequence length is:%d" % max(np.array(seq_len)))
 
     # sequence length distribution
     plt.figure(dpi=500)
@@ -121,7 +121,7 @@ if "AT" in mission_list:
         text = get_AT_RxnSmi(AT_df.iloc[i, :])
         train_set.append(smi_tokenizer(text))
         seq_len.append(len(smi_tokenizer(text)))
-    print("Maximum sequence length is:" % max(np.array(seq_len)))
+    print("Maximum sequence length is:%d" % max(np.array(seq_len)))
 
     # sequence length distribution
     plt.figure(dpi=500)
@@ -170,7 +170,7 @@ if "SNAR" in mission_list:
         text = get_SNAR_RxnSmi(SNAR_df.iloc[i, :])
         train_set.append(smi_tokenizer(text))
         seq_len.append(len(smi_tokenizer(text)))
-    print("Maximum sequence length is:" % max(np.array(seq_len)))
+    print("Maximum sequence length is:%d" % max(np.array(seq_len)))
 
     # sequence length distribution
     plt.figure(dpi=500)
@@ -208,3 +208,51 @@ if "SNAR" in mission_list:
     plt.title("S$_N$Ar Vocab Distribution")
     plt.tight_layout()
     plt.savefig("./SNAR Vocab Distribution.png")
+
+if "ELN" in mission_list:
+    train_set = list()
+    vocab_dict = dict()
+    seq_len = list()
+    ELN_df = pd.read_excel("../data/ELN/ELN.xlsx")
+    for i in range(ELN_df.shape[0]):
+        text = get_ELN_RxnSmi(ELN_df.iloc[i, :])
+        train_set.append(smi_tokenizer(text))
+        seq_len.append(len(smi_tokenizer(text)))
+    print("Maximum sequence length is:%d" % max(np.array(seq_len)))
+
+    # sequence length distribution
+    plt.figure(dpi=500)
+    sns.kdeplot(seq_len, fill=True)
+    plt.xlabel("Sequence Length")
+    plt.ylabel("Counting")
+    plt.yticks([])
+    plt.title("ELN Sequence Distribution")
+    plt.tight_layout()
+    plt.savefig("./ELN Sequence Distribution.png")
+
+    # generate vocab file
+    print("The length of train set is: %d" % len(train_set))
+    word_id = dict()
+    word_vec = list()
+    model = Word2Vec(train_set, vector_size=size, window=33, min_count=5, epochs=50, sg=1)
+    for i, w in enumerate(model.wv.index_to_key):
+        vocab_dict[w] = model.wv[w]
+        # record for evaluation
+        word_id[w] = i
+        word_vec.append(model.wv[w])
+    vocab_dict_to_txt(vocab_dict, rxn_name="ELN")
+    print("There are %d atoms in the dict" % len(vocab_dict))
+
+    # Evaluation
+    X_reduced = PCA(n_components=2).fit_transform(np.array(word_vec))
+    plt.figure(dpi=500)
+    plt.scatter(X_reduced[:, 0], X_reduced[:, 1], color="black")
+
+    for w in word_id.keys():
+        xy = X_reduced[word_id[w], :]
+        plt.scatter(xy[0], xy[1], color="r")
+        plt.text(xy[0], xy[1], w, color="b")
+
+    plt.title("ELN Vocab Distribution")
+    plt.tight_layout()
+    plt.savefig("./ELN Vocab Distribution.png")
