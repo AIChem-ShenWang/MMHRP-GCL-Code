@@ -89,6 +89,21 @@ def get_SNAR_RxnSmi(SNAR_df):
 
     return "".join(text)
 
+def get_ELN_RxnSmi(ELN_df):
+    reactant1 = ELN_df.loc["reactant1"]
+    reactant2 = ELN_df.loc["reactant2"]
+    product = ELN_df.loc["product"]
+    cats = ELN_df.loc["catalyst"].split(".")
+    sol = ELN_df.loc["solvent"]
+    base = ELN_df.loc["base"]
+
+    text = smi_tokenizer(reactant1) + ["."] + smi_tokenizer(reactant2) + [">"]
+    for cat in cats:
+        text = text + smi_tokenizer(cat) + ["."]
+    text = text[:-1] + smi_tokenizer(sol) + smi_tokenizer(base) + [">"] + smi_tokenizer(product)
+
+    return "".join(text)
+
 def get_Buchwald_rxnfp(BH_HTE_df):
     base = smi_tokenizer(BH_HTE_df.loc["base_smiles"])
     ligand = smi_tokenizer(BH_HTE_df.loc["ligand_smiles"])
