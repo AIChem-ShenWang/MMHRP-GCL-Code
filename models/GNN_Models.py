@@ -9,7 +9,7 @@ class GCN(nn.Module):
         self.conv1 = pyg_nn.GCNConv(node_feature_num, channels[0])
         self.conv2 = pyg_nn.GCNConv(channels[0], channels[1])
         self.mlp = nn.Sequential(
-            nn.Linear(channels[1], 500),
+            nn.Linear(2 * channels[1], 500),
             nn.ReLU(),
             nn.Linear(500, 100),
             nn.ReLU(),
@@ -26,7 +26,9 @@ class GCN(nn.Module):
         x = F.relu(x)
         x = self.conv2(x, edge_index)
         x = F.relu(x)
-        x = pyg_nn.global_mean_pool(x, batch=batch)
+        x_mean = pyg_nn.global_mean_pool(x, batch=batch)
+        x_max = pyg_nn.global_max_pool(x, batch=batch)
+        x = torch.cat([x_mean, x_max], 1)
 
         # MLP
         x = self.mlp(x)
@@ -39,7 +41,7 @@ class GAT(nn.Module):
         self.conv1 = pyg_nn.GATConv(node_feature_num, channels[0], heads=heads)
         self.conv2 = pyg_nn.GATConv(channels[0] * heads, channels[1], heads=heads)
         self.mlp = nn.Sequential(
-            nn.Linear(channels[1] * heads, 500),
+            nn.Linear(2 * channels[1] * heads, 500),
             nn.ReLU(),
             nn.Linear(500, 100),
             nn.ReLU(),
@@ -57,7 +59,9 @@ class GAT(nn.Module):
         x = F.relu(x)
         x = self.conv2(x, edge_index)
         x = F.relu(x)
-        x = pyg_nn.global_mean_pool(x, batch=batch)
+        x_mean = pyg_nn.global_mean_pool(x, batch=batch)
+        x_max = pyg_nn.global_max_pool(x, batch=batch)
+        x = torch.cat([x_mean, x_max], 1)
 
         # MLP
         x = self.mlp(x)
