@@ -12,7 +12,7 @@ The project consists of 4 folders: data, exp, models, utils. Each of which is de
 
   * AT: Asymmetric thiol addition reaction high-throughput  experimentation dataset
 
-  * SNAr: Nucleophilic aromatic substitution reactio literature-based dataset
+  * SNAr: Nucleophilic aromatic substitution reaction literature-based dataset
 
   * ELN: ELN dataset
 
