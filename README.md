@@ -18,7 +18,7 @@ The project consists of 4 folders: data, exp, models, utils. Each of which is de
 
 * exp folder:
 
-  * BH, Suzuki, AT, SNAR，ELN: The files named after the datasets in 4 HTE cases include the training and testing code for MMHRP-GCL, as well as the training test code for the replicated SOTA model, and a challenging dataset (ELN) containing the code for MMHRP-GCL.
+  * BH, Suzuki, AT, SNAR, ELN: The files named after the datasets in 4 HTE cases include the training and testing code for MMHRP-GCL, as well as the training test code for the replicated SOTA model, and a challenging dataset (ELN) containing the code for MMHRP-GCL.
 
   * Interpretability: Codes for generating model interpretability results
  
