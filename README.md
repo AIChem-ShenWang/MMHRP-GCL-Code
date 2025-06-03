@@ -1,4 +1,4 @@
-This project is the code for the paper "Multi-modal Homogeneous Chemical Reaction Performance Prediction with Graph and Chemical Language Information", including the dataset used and the code for model training, testing, and interpretive result generation. The paper is published as inside cover on Chin. J. Chem. 2025, 43, 1230 – 1238. (https://onlinelibrary.wiley.com/doi/full/10.1002/cjoc.202401186)
+This project is the code for the paper "Multi-modal Homogeneous Chemical Reaction Performance Prediction with Graph and Chemical Language Information", including the dataset used and the code for model training, testing, and interpretive result generation. The paper is published as an Inside Cover on _Chin. J. Chem._ **2025**, _43_, 1230 – 1238. (https://onlinelibrary.wiley.com/doi/full/10.1002/cjoc.202401186)
 
 The project uses Python in combination with the GPU provided by the Colab (https://colab.research.google.com) to build and train the model.The required python version and python libraries are listed in pkgs.txt.
 
