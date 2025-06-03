@@ -30,7 +30,7 @@ The project consists of 4 folders: data, exp, models, utils. Each of which is de
 
   * MMHRP_GCL.py: The framework of MMHRP-GCL
 
-  * GNN_Models.py: GCN models and GAT model frameworks
+  * GNN_Models.py: GCN and GAT model framework
 
   * vocab_generator.py: Smi2Vec models
 
