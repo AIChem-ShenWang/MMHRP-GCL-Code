@@ -28,7 +28,7 @@ The project consists of 4 folders: data, exp, models, utils. Each of which is de
 
   * FP_generator.py: Used to convert Reaction SMILES to RXNFP and DRFP.
 
-  * MMHRP.py: The framework of MMHRP-GCL
+  * MMHRP_GCL.py: The framework of MMHRP-GCL
 
   * GNN_Models.py: GCN models and GAT model frameworks
 
