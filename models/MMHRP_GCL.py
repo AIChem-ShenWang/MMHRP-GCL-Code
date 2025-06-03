@@ -60,7 +60,7 @@ class BiGRU(nn.Module):
             input_size=input_size,
             hidden_size=hidden_size,
             num_layers=num_layers,
-            batch_first=True,  # seq_len & batch_size order reverse
+            batch_first=True,
             bidirectional=True
         )
         self.fc = nn.Linear(2 * hidden_size, output_size)
@@ -80,9 +80,9 @@ class MMHRP_GCL(nn.Module):
     def __init__(self,
                  GraphEncoder: dict = None,
                  TextEncoder: dict = None,
-                 ModalityAlignment: dict = None,
                  Decoder: dict = None,
                  emb_size: int = 128,
+                 ModalityAlignment: bool = True,
                  device: str = torch.device('cuda')
                  ):
         super(MMHRP_GCL, self).__init__()
@@ -92,12 +92,12 @@ class MMHRP_GCL(nn.Module):
         self.GraphEncoder = GraphEncoder
         self.TextEncoder = TextEncoder
 
-        # 1.Encoder Parser
+        # Encoder Parser
         if GraphEncoder is None and TextEncoder is None:
             raise Exception("No Encoder")
 
-        # 1.1 GraphEncoder Parser
         if GraphEncoder is not None:
+          # GraphEncoder Parser
           Graph_params = ["NodeFeatNum", "Channels", "Heads"]
           for key in GraphEncoder.keys():
             if key not in Graph_params:
@@ -130,9 +130,9 @@ class MMHRP_GCL(nn.Module):
             self.GATU_CatSol,
             nn.Linear(self.GATU_OutSize, emb_size)
           )
-        # 1.2 TextEncoder Parser
 
         if TextEncoder is not None:
+          # TextEncoder Parser
           Text_params = ["SmiFeatNum", "Heads", "BigruChannels", "BigruNumlayer"]
           for key in TextEncoder.keys():
             if key not in Text_params:
@@ -144,12 +144,12 @@ class MMHRP_GCL(nn.Module):
                 Trans_Heads = TextEncoder[key] # 4
 
             if key == "BigruChannels":
-                BigruChannels =  TextEncoder[key] # [128, 128]
-                assert len(BigruChannels) == 2
-                bigru_input, bigru_hidden = BigruChannels
+                BigruChannels =  TextEncoder[key] # [128, 128, 128]
+                assert len(BigruChannels) == 3
+                bigru_input, bigru_hidden, bigru_output = BigruChannels
 
             if key == "BigruNumlayer":
-                bigru_num_layers = TextEncoder[key] # 2
+                bigru_num_layers =  TextEncoder[key] # 2
 
           # TextEncoder
           self.trans = nn.TransformerEncoderLayer(d_model=self.SmiFeatNum, nhead=Trans_Heads, batch_first=True, norm_first=True)
@@ -160,37 +160,28 @@ class MMHRP_GCL(nn.Module):
             nn.ReLU()
           )
 
-        # total_emb_size
+        # Decoder Parser
+        Decoder_params = ["Heads", "Channels"]
+        for key in Decoder.keys():
+            if key not in Decoder_params:
+                raise Exception("%s is not the param in Decoder")
+
+            if key == "Heads":
+                MA_Heads = Decoder[key] # 4
+            if key == "Channels":
+                Decoder_Channels = Decoder[key] # [1000, 500, 100]
+                assert len(Decoder_Channels) == 3
+
         total_emb_size = 0
         if GraphEncoder is not None:
             total_emb_size += emb_size * 2
         if TextEncoder is not None:
             total_emb_size += emb_size
 
-        # 2.Modality Alignment Parser
-        if ModalityAlignment is not None:
-            MA_params = ["Heads"]
-            for key in ModalityAlignment.keys():
-                if key not in MA_params:
-                    raise Exception("%s is not the param in Modality Alignment")
-
-                if key == "Heads":
-                    MA_Heads = ModalityAlignment[key]  # 4
-
-            # Modality Alignment
-            self.ModalityAlignment = ModalityAlignment
-            if self.ModalityAlignment:
-                self.MA = nn.TransformerEncoderLayer(d_model=total_emb_size, nhead=MA_Heads)
-
-        # 3.Decoder Parser
-        Decoder_params = ["Channels"]
-        for key in Decoder.keys():
-            if key not in Decoder_params:
-                raise Exception("%s is not the param in Decoder")
-
-            if key == "Channels":
-                Decoder_Channels = Decoder[key] # [1000, 500, 100]
-                assert len(Decoder_Channels) == 3
+        # Modality Alignment
+        self.ModalityAlignment = ModalityAlignment
+        if self.ModalityAlignment:
+            self.MA = nn.TransformerEncoderLayer(d_model=total_emb_size, nhead=MA_Heads)
 
         # Decoder
         self.decoder = nn.Sequential(
@@ -231,7 +222,7 @@ class MMHRP_GCL(nn.Module):
                                self.CatSolEncoder(CatSol_data)], dim=1)
 
         # Modality Alignment
-        if self.ModalityAlignment is not None:
+        if self.ModalityAlignment:
             x = self.MA(x)
 
         # Decoder
@@ -243,8 +234,7 @@ class MMHRP_GCL_Explanation(nn.Module):
     def __init__(self,
                  GraphEncoder: dict = None,
                  TextEncoder: dict = None,
-                 ModalityAlignment: dict = None,
-                 Decoder:dict = None,
+                 Decoder: dict = None,
                  emb_size: int = 128,
                  device: str = torch.device('cuda')
                  ):
@@ -253,11 +243,11 @@ class MMHRP_GCL_Explanation(nn.Module):
         # device
         self.device = device
 
-        # 1. Encoder Parser
+        # Encoder Parser
         if GraphEncoder is None and TextEncoder is None:
             raise Exception("No Encoder")
 
-        # 1.1 GraphEncoder Parser
+        # GraphEncoder Parser
         Graph_params = ["NodeFeatNum", "Channels", "Heads"]
         for key in GraphEncoder.keys():
             if key not in Graph_params:
@@ -296,14 +286,14 @@ class MMHRP_GCL_Explanation(nn.Module):
                 Trans_Heads = TextEncoder[key] # 4
 
             if key == "BigruChannels":
-                BigruChannels =  TextEncoder[key] # [128, 128]
-                assert len(BigruChannels) == 2
-                bigru_input, bigru_hidden = BigruChannels
+                BigruChannels =  TextEncoder[key] # [128, 128, 128]
+                assert len(BigruChannels) == 3
+                bigru_input, bigru_hidden, bigru_output = BigruChannels
 
             if key == "BigruNumlayer":
                 bigru_num_layers =  TextEncoder[key] # 1
 
-        # 1.2 TextEncoder
+        # TextEncoder
         self.trans = nn.TransformerEncoderLayer(d_model=self.SmiFeatNum, nhead=Trans_Heads, batch_first=True, norm_first=True)
         self.bigru = BiGRU(bigru_input, bigru_hidden, bigru_num_layers, emb_size, device)
         self.RxnSmiEncoder = nn.Sequential(
@@ -312,32 +302,26 @@ class MMHRP_GCL_Explanation(nn.Module):
           nn.ReLU()
         )
 
-        # total_emb_size
+        # Decoder Parser
+        Decoder_params = ["Heads", "Channels"]
+        for key in Decoder.keys():
+            if key not in Decoder_params:
+                raise Exception("%s is not the param in Decoder")
+
+            if key == "Heads":
+                MA_Heads = Decoder[key] # 4
+            if key == "Channels":
+                Decoder_Channels = Decoder[key] # [1000, 500, 100]
+                assert len(Decoder_Channels) == 3
+
         total_emb_size = 0
         if GraphEncoder is not None:
             total_emb_size += emb_size * 2
         if TextEncoder is not None:
             total_emb_size += emb_size
 
-        # 2.Modality Alignment Parser
-        MA_params = ["Heads"]
-        for key in ModalityAlignment.keys():
-            if key not in MA_params:
-                raise Exception("%s is not the param in Modality Alignment")
-
-            if key == "Heads":
-                MA_Heads = ModalityAlignment[key]  # 4
-        self.MA = nn.TransformerEncoderLayer(d_model=emb_size, nhead=MA_Heads)
-
-        # 3.Decoder Parser
-        Decoder_params = ["Channels"]
-        for key in Decoder.keys():
-            if key not in Decoder_params:
-                raise Exception("%s is not the param in Decoder")
-
-            if key == "Channels":
-                Decoder_Channels = Decoder[key]  # [1000, 500, 100]
-                assert len(Decoder_Channels) == 3
+        # Modality Alignment
+        self.MA = nn.TransformerEncoderLayer(d_model=total_emb_size, nhead=MA_Heads)
 
         # Decoder
         self.decoder = nn.Sequential(
