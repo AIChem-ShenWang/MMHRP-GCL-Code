@@ -92,12 +92,12 @@ class MMHRP_GCL(nn.Module):
         self.GraphEncoder = GraphEncoder
         self.TextEncoder = TextEncoder
 
-        # Encoder Parser
+        # 1. Encoder Parser
         if GraphEncoder is None and TextEncoder is None:
             raise Exception("No Encoder")
-
+        
+        # 1.1 GraphEncoder Parser
         if GraphEncoder is not None:
-          # GraphEncoder Parser
           Graph_params = ["NodeFeatNum", "Channels", "Heads"]
           for key in GraphEncoder.keys():
             if key not in Graph_params:
@@ -131,8 +131,8 @@ class MMHRP_GCL(nn.Module):
             nn.Linear(self.GATU_OutSize, emb_size)
           )
 
+        # 1.2 TextEncoder Parser
         if TextEncoder is not None:
-          # TextEncoder Parser
           Text_params = ["SmiFeatNum", "Heads", "BigruChannels", "BigruNumlayer"]
           for key in TextEncoder.keys():
             if key not in Text_params:
@@ -160,7 +160,7 @@ class MMHRP_GCL(nn.Module):
             nn.ReLU()
           )
 
-        # Decoder Parser
+        # 2. Decoder Parser
         Decoder_params = ["Heads", "Channels"]
         for key in Decoder.keys():
             if key not in Decoder_params:
@@ -178,12 +178,12 @@ class MMHRP_GCL(nn.Module):
         if TextEncoder is not None:
             total_emb_size += emb_size
 
-        # Modality Alignment
+        # 2.1 Modality Alignment
         self.ModalityAlignment = ModalityAlignment
         if self.ModalityAlignment:
             self.MA = nn.TransformerEncoderLayer(d_model=total_emb_size, nhead=MA_Heads)
 
-        # Decoder
+        # 2.2 Decoder
         self.decoder = nn.Sequential(
             nn.Linear(total_emb_size, Decoder_Channels[0]),
             nn.ReLU(),
@@ -243,11 +243,11 @@ class MMHRP_GCL_Explanation(nn.Module):
         # device
         self.device = device
 
-        # Encoder Parser
+        # 1. Encoder Parser
         if GraphEncoder is None and TextEncoder is None:
             raise Exception("No Encoder")
 
-        # GraphEncoder Parser
+        # 1.1 GraphEncoder Parser
         Graph_params = ["NodeFeatNum", "Channels", "Heads"]
         for key in GraphEncoder.keys():
             if key not in Graph_params:
@@ -274,7 +274,7 @@ class MMHRP_GCL_Explanation(nn.Module):
         self.ReaProLinear = nn.Linear(self.GATU_OutSize, emb_size)
         self.CatSolLinear = nn.Linear(self.GATU_OutSize, emb_size)
 
-        # TextEncoder Parser
+        # 1.2 TextEncoder Parser
         Text_params = ["SmiFeatNum", "Heads", "BigruChannels", "BigruNumlayer"]
         for key in TextEncoder.keys():
             if key not in Text_params:
@@ -302,7 +302,7 @@ class MMHRP_GCL_Explanation(nn.Module):
           nn.ReLU()
         )
 
-        # Decoder Parser
+        # 2. Decoder Parser
         Decoder_params = ["Heads", "Channels"]
         for key in Decoder.keys():
             if key not in Decoder_params:
@@ -320,10 +320,10 @@ class MMHRP_GCL_Explanation(nn.Module):
         if TextEncoder is not None:
             total_emb_size += emb_size
 
-        # Modality Alignment
+        # 2.1 Modality Alignment
         self.MA = nn.TransformerEncoderLayer(d_model=total_emb_size, nhead=MA_Heads)
 
-        # Decoder
+        # 2.2 Decoder
         self.decoder = nn.Sequential(
             nn.Linear(total_emb_size, Decoder_Channels[0]),
             nn.ReLU(),
